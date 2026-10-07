@@ -1,0 +1,15 @@
+name,sun,weeks_before_frost,days_to_harvest,difficulty,spacing
+radish,"full,partial",4,30,new,2in
+methi,"full,partial",4,30,new,3in
+spinach,"partial,shade",6,40,new,4in
+coriander,"partial,shade",6,35,new,3in
+lettuce,"partial,shade",6,35,new,6in
+cucumber,full,6,55,some,12in
+marigold,"full,partial",8,60,new,6in
+beans,full,8,50,some,4in
+peas,"full,partial",10,60,some,3in
+carrot,"full,partial",10,70,some,2in
+onion,"full,partial",10,90,some,4in
+garlic,full,10,120,some,4in
+tomato,full,12,80,green,12in
+chilli,full,12,90,green,12in

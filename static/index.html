@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pincode Garden</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:560px;margin:2rem auto;padding:0 1rem;line-height:1.5;color:#1d241d}
+h1{margin:0 0 .25rem;font-size:1.6rem}
+.sub{margin:0 0 1rem;color:#445244}
+.row{display:flex;gap:.75rem;flex-wrap:wrap}.row>*{flex:1;min-width:140px}
+label{display:block;font-size:.9rem;font-weight:600}input,select,button{font-size:1rem;padding:.45rem .6rem;margin:.25rem 0;width:100%;box-sizing:border-box}
+button{width:auto;cursor:pointer;border:1px solid #2c7a2c;background:#2c7a2c;color:#fff;border-radius:6px;padding:.5rem 1rem}
+button.secondary{background:#fff;color:#2c7a2c}
+#card{margin-top:1.25rem;border:1px solid #d7e2d7;border-radius:10px;padding:1rem;background:#f8faf8;display:none}
+#crops{list-style:none;margin:0 0 .75rem;padding:0;display:grid;gap:.6rem}
+#crops li{background:#fff;border:1px solid #d7e2d7;border-radius:8px;padding:.6rem .75rem}
+#crops .crop{font-weight:700}
+.meta{margin:.4rem 0}.label{font-weight:700}
+.small{color:#5a665a;font-size:.85rem}
+.actions{display:flex;gap:.5rem;margin-top:.75rem}
+</style>
+</head>
+<body>
+<h1>Pincode Garden</h1>
+<p class="sub">Garden planner. Enter pincode, time, and sun to see what to plant. No signal outside? Take a screenshot first, it still helps in airplane mode.</p>
+<div class="row">
+<label>Pincode<input id="pincode" type="text" value="110016"></label>
+<label>Minutes per week<input id="minutes" type="number" value="30" min="5" max="300"></label>
+</div>
+<div class="row">
+<label>Sun<select id="sun"><option>full</option><option>partial</option><option>shade</option></select></label>
+<label>Experience<select id="experience"><option>new</option><option>some</option><option>green</option></select></label>
+</div>
+<p><button id="deal" type="button">What to plant?</button></p>
+<div id="card">
+<ul id="crops"></ul>
+<p class="meta"><span class="label">Tip: </span><span id="tip"></span></p>
+<p class="meta"><span class="label">Frost: </span><span id="frost"></span></p>
+<div class="actions">
+<button id="read" class="secondary" type="button">Read aloud</button>
+<button id="done" type="button">Complete</button>
+</div>
+<p class="small" id="flags"></p>
+<p class="small" id="streak"></p>
+</div>
+<script>
+let current = null;
+deal.onclick = async () => {
+  const body = {pincode: pincode.value, minutes: +minutes.value, sun: sun.value, experience: experience.value};
+  const r = await fetch('/api/sow', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+  current = await r.json();
+  crops.innerHTML = current.crops.slice(0, 3).map(c =>
+    `<li><span class="crop">${c.name}</span> (${c.score}) — ${c.why} <span class="small">Sow by ${c.sow_by}</span></li>`).join('');
+  tip.textContent = current.tip;
+  frost.textContent = `Last frost ${current.frost.last_frost} / first frost ${current.frost.first_frost} / ${current.frost.weeks_left_in_window} weeks left`;
+  flags.textContent = `Smart advice ${current.used_gemma ? 'on' : 'off'} · Yield check ${current.used_tabpfn ? 'on' : 'off'}`;
+  streak.textContent = '';
+  card.style.display = 'block';
+};
+read.onclick = () => {
+  if (!current || !current.crops || !current.crops.length || !current.tip) return;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(new SpeechSynthesisUtterance(current.tip + '. Top pick: ' + current.crops[0].name));
+};
+done.onclick = async () => {
+  if (!current || !current.plan_id) return;
+  const r = await fetch('/api/complete', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({plan_id: current.plan_id})});
+  const d = await r.json();
+  streak.textContent = `Done. Streak: ${d.streak} plantings.`;
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+pincode_prefix,zone,first_frost,last_frost
+11,north,12-15,02-15
+12,north,12-20,02-10
+13,north,12-10,02-20
+14,north,12-15,02-15
+30,west,01-05,02-01
+36,east,01-10,02-05
+56,south,NA,NA
+5,south,NA,NA
+6,south,NA,NA
+*,fallback,12-01,02-28
